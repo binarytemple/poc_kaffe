@@ -17,9 +17,15 @@ defmodule PocKaffe.Application do
 end
 
 defmodule PocKaffe.ExampleConsumer do
-  def handle_message(%{key: key, value: value} = message) do
+
+  def handle_message(pid, %{key: key, value: value} = message) do
+    IO.puts("handling message..")
     IO.inspect(message)
     IO.puts("#{key}: #{value}")
+    # this can be anywhere in the system...
+    # we could for example spawn a process or call to a pool of processes
+    # in this example we ack then return :ok (blocking pattern)
+    Kaffe.Consumer.ack(pid, message)
     :ok
   end
 end

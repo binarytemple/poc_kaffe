@@ -304,6 +304,13 @@ insert into events (id, kafkatsvalue, field1,field2,...) on conflict existing e 
 if e.kafkatsvalue  < new.kafkatsvalue ... then store the data ... otherwise NOP..
 
 
+------
+
+## Async ACK behavior
+
+
+https://github.com/spreedly/kaffe/blob/6d7b860670a612fe754c7ce88e37925103360434/README.md#async-message-acknowledgement
+
 
 
 
