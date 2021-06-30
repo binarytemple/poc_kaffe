@@ -270,6 +270,58 @@ iex(3)> %{
 key1: test
 ```
 
+So.. lets produce and consume another message... 
+
+```
+%{
+  headers: [],
+  key: "key1",
+  offset: 4,
+  partition: 2,
+  topic: "topic1",
+  ts: 1625051581049,
+  ts_type: :create,
+  value: "test2\n"
+}
+key1: test2
+```
+
+We can see that the ts has incremented again: 
+
+
+% echo $(( 1625051581049 - 1625051465330))
+115719
+
+It is the nature of the consensus groups used by Kafka to ensure consistent sharding/shard reads that the timestamp will always monotonically increase.
+
+We could use this characteristic for CAS (compare and set) operation to database/data store. 
+
+For example : 
+
+1. We set a unique constraint on an object field for event id 
+2. We insert to cockroachdb, using a similar statement to what we used on XXXStrike
+insert into events (id, kafkatsvalue, field1,field2,...) on conflict existing e ... 
+if e.kafkatsvalue  < new.kafkatsvalue ... then store the data ... otherwise NOP..
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
