@@ -6,5 +6,5 @@ config :kaffe,
     topics: ["topic1"],
     # the consumer group for tracking offsets in Kafka
     consumer_group: "group1",
-    message_handler: ExampleConsumer
+    message_handler: PocKaffe.ExampleConsumer
   ]

@@ -185,6 +185,92 @@ https://github.com/kafka4beam/kafka_protocol/blob/293551fb6c1a2d0a6e06a19691eb60
 So... we have a key which can be unique per event -> which we can use to ensure that all messages relating to an event are ordered with a monotonically incrementing 'ts' 
 
 
+----
+
+Boot the elixir application and try to get it to consume messages... 
+
+% docker exec -ti redpanda-1 rpk topic --brokers 127.0.0.1:9092 produce -k key1 topic1
+Reading message... Press CTRL + D to send, CTRL + C to cancel.
+a test message Sent record to partition 2 at offset 2 with timestamp 2021-06-30 11:08:32.0117013 +0000 UTC m=+10.576630401.
+
+
+```
+
+12:08:32.593 [error] GenServer #PID<0.281.0> terminating
+** (UndefinedFunctionError) function ExampleConsumer.handle_message/1 is undefined (module ExampleConsumer is not available)
+    ExampleConsumer.handle_message(%{headers: [], key: "key1", offset: 2, partition: 2, topic: "topic1", ts: 1625051312011, ts_type: :create, value: "a test message "})
+    (kaffe 1.20.0) lib/kaffe/consumer.ex:133: Kaffe.Consumer.handle_message/4
+    (brod 3.15.6) /Users/b/repos/bryanhuntesl/poc_kaffe/deps/brod/src/brod_group_subscriber.erl:530: :brod_group_subscriber.handle_messages/4
+    (brod 3.15.6) /Users/b/repos/bryanhuntesl/poc_kaffe/deps/brod/src/brod_group_subscriber.erl:323: :brod_group_subscriber.handle_info/2
+    (stdlib 3.15) gen_server.erl:695: :gen_server.try_dispatch/4
+    (stdlib 3.15) gen_server.erl:771: :gen_server.handle_msg/6
+    (stdlib 3.15) proc_lib.erl:226: :proc_lib.init_p_do_apply/3
+Last message: {#PID<0.255.0>, {:kafka_message_set, "topic1", 2, 3, [{:kafka_message, 2, "key1", "a test message ", :create, 1625051312011, []}]}}
+State: {:state, :group1, #Reference<0.3222208718.2129657864.7791>, "group1", "nonode@nohost/<0.282.0>-4d0d29bd-ebf7-464d-91f2-7e0647e2ef66", 7, #PID<0.282.0>, [{:consumer, {"topic1", 0}, #PID<0.253.0>, #Reference<0.3222208718.2129657864.7813>, :undefined, :undefined, :undefined}, {:consumer, {"topic1", 1}, #PID<0.254.0>, #Reference<0.3222208718.2129657864.7815>, :undefined, :undefined, :undefined}, {:consumer, {"topic1", 2}, #PID<0.255.0>, #Reference<0.3222208718.2129657866.10598>, :undefined, :undefined, :undefined}], [auto_start_producers: false, allow_topic_auto_creation: false, begin_offset: -1], false, #Reference<0.3222208718.2129657866.10599>, Kaffe.Consumer, %Kaffe.Consumer.State{async: false, message_handler: ExampleConsumer}, :message}
+
+12:08:32.593 [info]  Group member (group1,coor=#PID<0.282.0>,cb=#PID<0.281.0>,generation=7):
+Leaving group, reason: {:undef,
+ [
+   {ExampleConsumer, :handle_message,
+    [
+      %{
+        headers: [],
+        key: "key1",
+        offset: 2,
+        partition: 2,
+        topic: "topic1",
+        ts: 1625051312011,
+        ts_type: :create,
+        value: "a test message "
+      }
+    ], []},
+   {Kaffe.Consumer, :handle_message, 4,
+    [file: 'lib/kaffe/consumer.ex', line: 133]},
+   {:brod_group_subscriber, :handle_messages, 4,
+    [
+      file: '/Users/b/repos/bryanhuntesl/poc_kaffe/deps/brod/src/brod_group_subscriber.erl',
+      line: 530
+    ]},
+   {:brod_group_subscriber, :handle_info, 2,
+    [
+      file: '/Users/b/repos/bryanhuntesl/poc_kaffe/deps/brod/src/brod_group_subscriber.erl',
+      line: 323
+    ]},
+   {:gen_server, :try_dispatch, 4, [file: 'gen_server.erl', line: 695]},
+   {:gen_server, :handle_msg, 6, [file: 'gen_server.erl', line: 771]},
+   {:proc_lib, :init_p_do_apply, 3, [file: 'proc_lib.erl', line: 226]}
+ ]}
+
+
+12:08:32.595 [info]  Application poc_kaffe exited: shutdown
+```
+
+Stupid misconfiguration on my part, correct the consumer name and try again... 
+
+```
+% docker exec -ti redpanda-1 rpk topic --brokers 127.0.0.1:9092 produce -k key1 topic1
+Reading message... Press CTRL + D to send, CTRL + C to cancel.
+test
+Sent record to partition 2 at offset 3 with timestamp 2021-06-30 11:11:05.3301008 +0000 UTC m=+4.908713201.
+```
+
+results in ...
+
+```
+iex(3)> %{
+  headers: [],
+  key: "key1",
+  offset: 3,
+  partition: 2,
+  topic: "topic1",
+  ts: 1625051465330,
+  ts_type: :create,
+  value: "test\n"
+}
+key1: test
+```
+
+
 
 
 
